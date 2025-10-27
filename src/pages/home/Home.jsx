@@ -1,12 +1,12 @@
 const Home = () => {
   return (
     <main className='home-page p-8'>
-      <h1 className='text-2xl font-bold mb-4'>Explora en el archivo</h1>
+      <h1 className='text-2xl font-bold mb-4 text-accent text-center'>Explora en el archivo</h1>
       <div className='flex gap-8 justify-center items-center'>
         <aside className='w-1/5 border-r border-accent'>
-          <h2>Filtrar discursos</h2>
+          <h2 className='text-xl text-accent'>Filtrar discursos</h2>
           <div>
-            <p>Por palabra clave:</p>
+            <p className='text-accent'>Por palabra clave:</p>
             <input type='text' placeholder='Ej. Marxismo, Latinoamerica' />
           </div>
           <div>
