@@ -6,9 +6,9 @@ const Nav = () => {
         <p>Archivo de discursos de Fidel Castro</p>
       </div>
       <nav className='flex justify-center items-center gap-4'>
-        <a className='hover:border-b border-accent transition-colors' href='/speeches'>Quienes somos</a>
-        <a className='hover:border-b border-accent transition-colors' href='/speeches'>Discursos</a>
-        <a className='hover:border-b border-accent transition-colors' href='/speeches'>Contacto</a>
+        <a className='hover:border-b border-primary transition-colors' href='/speeches'>Quienes somos</a>
+        <a className='hover:border-b border-primary transition-colors' href='/speeches'>Discursos</a>
+        <a className='hover:border-b border-primary transition-colors' href='/speeches'>Contacto</a>
       </nav>
     </header>
   )
