@@ -1,6 +1,6 @@
 const Nav = () => {
   return (
-    <header className='border-b border-text-light p-4 w-full flex justify-between items-center'>
+    <header className='bg-background-dark border-b border-text-light p-4 w-full flex justify-between items-center fixed top-0z-10'>
       <div className='flex justify-center items-center gap-2'>
         <p className='font-bold text-2xl text-red-700'>F</p>
         <p>Archivo de discursos de Fidel Castro</p>
