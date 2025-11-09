@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { speeches } from '../../data/speeches'
+import FilterSidebar from '../../components/molecules/FilterSidebar'
 
 const HighlightedText = ({ text, searchTerms, caseSensitive }) => {
   if (!searchTerms.length) return text
@@ -27,6 +29,10 @@ const HighlightedText = ({ text, searchTerms, caseSensitive }) => {
 }
 
 const Home = () => {
+  const navigate = useNavigate()
+  // Estado para controlar la visibilidad del sidebar en móvil
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
   // Estados para los valores de los filtros
   const [filterValues, setFilterValues] = useState({
     keywords: '',
@@ -106,98 +112,29 @@ const Home = () => {
   }
 
   return (
-    <main className='home-page pt-[85px] px-8 pb-8 h-screen overflow-hidden'>
-      <div className='flex gap-8 justify-center'>
-        <aside className='w-1/5 border-r border-primary flex flex-col gap-4 items-start'>
-          <h2 className='text-xl text-primary'>Filtrar discursos</h2>
-          <div>
-            <p className='text-primary'>Por palabra clave:</p>
-            <div className='flex flex-col gap-2'>
-              <input
-                type='text'
-                value={filterValues.keywords}
-                onChange={(e) => setFilterValues({
-                  ...filterValues,
-                  keywords: e.target.value
-                })}
-                placeholder='Ej. Marxismo, Latinoamerica'
-              />
-              <div className='flex items-center gap-2'>
-                <label className='flex items-center gap-1 text-sm'>
-                  <input
-                    type='checkbox'
-                    checked={filterValues.caseSensitive}
-                    onChange={(e) => setFilterValues({
-                      ...filterValues,
-                      caseSensitive: e.target.checked
-                    })}
-                  />
-                  <span>Coincidir mayúsculas/minúsculas</span>
-                </label>
-              </div>
-              <p className='text-secondary text-sm font-light'>Las palabras deben estar separadas por comas</p>
-              {appliedFilters.keywords.trim() && (
-                <p className='text-primary text-sm'>
-                  {filteredSpeeches.length} {filteredSpeeches.length === 1 ? 'discurso encontrado' : 'discursos encontrados'}
-                </p>
-              )}
-            </div>
-          </div>
-          <div>
-            <p>Por rango de fechas:</p>
-            <div className='flex gap-2 mt-2'>
-              <input
-                type='date'
-                className='flex-1'
-                value={filterValues.dateRange.start}
-                onChange={(e) => setFilterValues({
-                  ...filterValues,
-                  dateRange: { ...filterValues.dateRange, start: e.target.value }
-                })}
-              />
-              <input
-                type='date'
-                className='flex-1'
-                value={filterValues.dateRange.end}
-                onChange={(e) => setFilterValues({
-                  ...filterValues,
-                  dateRange: { ...filterValues.dateRange, end: e.target.value }
-                })}
-              />
-            </div>
-          </div>
-          <div>
-            <p>Por localización:</p>
-            <input
-              type='text'
-              placeholder='Ej. Habana'
-              value={filterValues.location}
-              onChange={(e) => setFilterValues({
-                ...filterValues,
-                location: e.target.value
-              })}
-            />
-          </div>
-          <div className='mt-4 flex justify-around gap-2'>
-            <button
-              type='button'
-              className='px-4 py-2 bg-primary text-white rounded'
-              onClick={applyFilters}
-            >
-              Aplicar filtros
-            </button>
-            <button
-              type='button'
-              className='px-4 py-2 bg-secondary text-white rounded'
-              onClick={clearFilters}
-            >
-              Limpiar filtros
-            </button>
-          </div>
-        </aside>
-        <section className='w-4/5'>
+    <main className='home-page pt-[85px] px-4 sm:px-8 pb-8 h-screen overflow-hidden'>
+      {/* Botón de filtros para móvil */}
+      <button
+        className='lg:hidden fixed bottom-4 right-4 z-30 bg-primary text-white px-4 py-2 rounded-full shadow-lg'
+        onClick={() => setIsSidebarOpen(true)}
+      >
+        Filtros
+      </button>
+
+      <div className='flex flex-col lg:flex-row gap-8 justify-center'>
+        <FilterSidebar
+          filterValues={filterValues}
+          setFilterValues={setFilterValues}
+          appliedFilters={appliedFilters}
+          filteredSpeeches={filteredSpeeches}
+          applyFilters={applyFilters}
+          clearFilters={clearFilters}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+        <section className='w-full lg:w-4/5'>
           <h2 className='text-xl text-primary text-center mb-4'>LISTA DE DISCURSOS</h2>
-          <div className='grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-4 overflow-y-auto h-[80vh] pr-4'>
+          <div className='grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-4 overflow-y-auto h-[80vh] pr-0 lg:pr-4'>
             {filteredSpeeches.map((speech, index) => {
               const searchTerms = appliedFilters.keywords.split(',').map(term => term.trim()).filter(Boolean)
               return (
@@ -219,7 +156,13 @@ const Home = () => {
                       caseSensitive={appliedFilters.caseSensitive}
                     />
                   </p>
-                  <button type='button' className='inline-block mt-2 px-2 py-1 bg-accent text-secondary font-semibold rounded'>Ver más</button>
+                  <button
+                    type='button'
+                    className='inline-block mt-2 px-2 py-1 bg-accent text-secondary font-semibold rounded hover:bg-accent/80 transition-colors'
+                    onClick={() => navigate(`/speech/${index}`)}
+                  >
+                    Ver más
+                  </button>
                 </article>
               )
             })}
