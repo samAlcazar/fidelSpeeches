@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react'
 import { speeches } from '../../data/speeches'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
+import HighlightedText from '../../components/atoms/HighlightedText'
 
 const Speech = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const [speech, setSpeech] = useState(null)
+
+  const { keywords = '', caseSensitive = false } = location.state || {}
+  const searchTerms = keywords.split(',').map(term => term.trim()).filter(Boolean)
 
   useEffect(() => {
     const selectedSpeech = speeches[parseInt(id)]
@@ -38,7 +43,13 @@ const Speech = () => {
 
       <article className='bg-card-dark border border-border-dark rounded-xl p-6 sm:p-8'>
         <header className='mb-8'>
-          <h1 className='text-2xl sm:text-3xl font-bold text-primary mb-4'>{speech.title}</h1>
+          <h1 className='text-2xl sm:text-3xl font-bold text-primary mb-4'>
+            <HighlightedText
+              text={speech.title}
+              searchTerms={searchTerms}
+              caseSensitive={caseSensitive}
+            />
+          </h1>
           <div className='flex flex-col sm:flex-row gap-2 sm:gap-6 text-sm text-secondary'>
             <p><span className='font-semibold'>Fecha:</span> {speech.date}</p>
             <p><span className='font-semibold'>Lugar:</span> {speech.place}</p>
@@ -48,14 +59,24 @@ const Speech = () => {
 
         <div className='mb-6'>
           <h2 className='text-xl font-semibold text-primary mb-3'>Resumen</h2>
-          <p className='text-text-dark leading-relaxed'>{speech.excerpt}</p>
+          <p className='text-text-dark leading-relaxed'>
+            <HighlightedText
+              text={speech.excerpt}
+              searchTerms={searchTerms}
+              caseSensitive={caseSensitive}
+            />
+          </p>
         </div>
 
         <div className='space-y-4'>
           <h2 className='text-xl font-semibold text-primary mb-3'>Discurso completo</h2>
           {speech.content.map((paragraph, index) => (
             <p key={index} className='text-text-dark leading-relaxed'>
-              {paragraph}
+              <HighlightedText
+                text={paragraph}
+                searchTerms={searchTerms}
+                caseSensitive={caseSensitive}
+              />
             </p>
           ))}
         </div>

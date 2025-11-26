@@ -3,10 +3,7 @@ import { useEffect } from 'react'
 const FilterSidebar = ({
   filterValues,
   setFilterValues,
-  appliedFilters,
   filteredSpeeches,
-  applyFilters,
-  clearFilters,
   isOpen,
   onClose
 }) => {
@@ -70,73 +67,12 @@ const FilterSidebar = ({
               </label>
             </div>
             <p className='text-secondary text-sm font-light'>Las palabras deben estar separadas por comas</p>
-            {appliedFilters.keywords.trim() && (
+            {filterValues.keywords.trim() && (
               <p className='text-primary text-sm'>
                 {filteredSpeeches.length} {filteredSpeeches.length === 1 ? 'discurso encontrado' : 'discursos encontrados'}
               </p>
             )}
           </div>
-        </div>
-
-        <div className='w-full'>
-          <p className='text-primary mb-2'>Por rango de fechas:</p>
-          <div className='flex flex-col gap-2'>
-            <input
-              type='date'
-              className='w-full'
-              value={filterValues.dateRange.start}
-              onChange={(e) => setFilterValues({
-                ...filterValues,
-                dateRange: { ...filterValues.dateRange, start: e.target.value }
-              })}
-            />
-            <input
-              type='date'
-              className='w-full'
-              value={filterValues.dateRange.end}
-              onChange={(e) => setFilterValues({
-                ...filterValues,
-                dateRange: { ...filterValues.dateRange, end: e.target.value }
-              })}
-            />
-          </div>
-        </div>
-
-        <div className='w-full'>
-          <p className='text-primary mb-2'>Por localización:</p>
-          <input
-            type='text'
-            placeholder='Ej. Habana'
-            className='w-full'
-            value={filterValues.location}
-            onChange={(e) => setFilterValues({
-              ...filterValues,
-              location: e.target.value
-            })}
-          />
-        </div>
-
-        <div className='mt-4 flex flex-col sm:flex-row gap-2 w-full'>
-          <button
-            type='button'
-            className='flex-1 px-4 py-2 bg-primary text-white rounded'
-            onClick={() => {
-              applyFilters()
-              onClose()
-            }}
-          >
-            Aplicar filtros
-          </button>
-          <button
-            type='button'
-            className='flex-1 px-4 py-2 bg-secondary text-white rounded'
-            onClick={() => {
-              clearFilters()
-              onClose()
-            }}
-          >
-            Limpiar filtros
-          </button>
         </div>
       </aside>
     </>

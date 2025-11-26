@@ -1,32 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { speeches } from '../../data/speeches'
 import FilterSidebar from '../../components/molecules/FilterSidebar'
-
-const HighlightedText = ({ text, searchTerms, caseSensitive }) => {
-  if (!searchTerms.length) return text
-
-  const regex = new RegExp(
-    `(${searchTerms.map(term => term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`,
-    caseSensitive ? 'g' : 'gi'
-  )
-
-  const parts = text.split(regex)
-  return parts.map((part, i) => {
-    const isMatch = searchTerms.some(term =>
-      caseSensitive
-        ? part === term
-        : part.toLowerCase() === term.toLowerCase()
-    )
-    return isMatch
-      ? (
-        <span key={i} className='bg-accent/30'>{part}</span>
-        )
-      : (
-          part
-        )
-  })
-}
+import HighlightedText from '../../components/atoms/HighlightedText'
 
 const Home = () => {
   const navigate = useNavigate()
@@ -36,23 +12,12 @@ const Home = () => {
   // Estados para los valores de los filtros
   const [filterValues, setFilterValues] = useState({
     keywords: '',
-    caseSensitive: false,
-    dateRange: { start: '', end: '' },
-    location: ''
-  })
-
-  // Estados para los filtros aplicados
-  const [appliedFilters, setAppliedFilters] = useState({
-    keywords: '',
-    caseSensitive: false,
-    dateRange: { start: '', end: '' },
-    location: ''
+    caseSensitive: false
   })
 
   const [filteredSpeeches, setFilteredSpeeches] = useState(speeches)
 
-  const applyFilters = () => {
-    setAppliedFilters(filterValues)
+  useEffect(() => {
     let filtered = speeches
     // Filtrar por palabras clave
     if (filterValues.keywords.trim()) {
@@ -70,45 +35,14 @@ const Home = () => {
         })
       })
     }
-
-    // Filtrar por localización
-    if (filterValues.location.trim()) {
-      const locationTerm = filterValues.caseSensitive
-        ? filterValues.location.trim()
-        : filterValues.location.trim().toLowerCase()
-      filtered = filtered.filter(speech => {
-        const place = filterValues.caseSensitive ? speech.place : speech.place.toLowerCase()
-        return place.includes(locationTerm)
-      })
-    }
-
-    // Filtrar por rango de fechas
-    if (filterValues.dateRange.start || filterValues.dateRange.end) {
-      filtered = filtered.filter(speech => {
-        const speechDate = new Date(speech.date)
-        const start = filterValues.dateRange.start ? new Date(filterValues.dateRange.start) : null
-        const end = filterValues.dateRange.end ? new Date(filterValues.dateRange.end) : null
-
-        if (start && end) return speechDate >= start && speechDate <= end
-        if (start) return speechDate >= start
-        if (end) return speechDate <= end
-        return true
-      })
-    }
-
     setFilteredSpeeches(filtered)
-  }
+  }, [filterValues])
 
   const clearFilters = () => {
-    const emptyFilters = {
+    setFilterValues({
       keywords: '',
-      caseSensitive: false,
-      dateRange: { start: '', end: '' },
-      location: ''
-    }
-    setFilterValues(emptyFilters)
-    setAppliedFilters(emptyFilters)
-    setFilteredSpeeches(speeches)
+      caseSensitive: false
+    })
   }
 
   return (
@@ -125,9 +59,7 @@ const Home = () => {
         <FilterSidebar
           filterValues={filterValues}
           setFilterValues={setFilterValues}
-          appliedFilters={appliedFilters}
           filteredSpeeches={filteredSpeeches}
-          applyFilters={applyFilters}
           clearFilters={clearFilters}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
@@ -136,14 +68,14 @@ const Home = () => {
           <h2 className='text-xl text-primary text-center mb-4'>LISTA DE DISCURSOS</h2>
           <div className='grid grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(350px,1fr))] gap-4 overflow-y-auto h-[80vh] pr-0 lg:pr-4'>
             {filteredSpeeches.map((speech, index) => {
-              const searchTerms = appliedFilters.keywords.split(',').map(term => term.trim()).filter(Boolean)
+              const searchTerms = filterValues.keywords.split(',').map(term => term.trim()).filter(Boolean)
               return (
                 <article key={index} className='border border-border-dark p-4 bg-card-dark rounded-xl font-light'>
                   <h3 className='text-lg font-semibold text-primary'>
                     <HighlightedText
                       text={speech.title}
                       searchTerms={searchTerms}
-                      caseSensitive={appliedFilters.caseSensitive}
+                      caseSensitive={filterValues.caseSensitive}
                     />
                   </h3>
                   <p><span className='text-primary font-semibold'>Fecha:</span> {speech.date}</p>
@@ -153,13 +85,18 @@ const Home = () => {
                     <HighlightedText
                       text={speech.excerpt}
                       searchTerms={searchTerms}
-                      caseSensitive={appliedFilters.caseSensitive}
+                      caseSensitive={filterValues.caseSensitive}
                     />
                   </p>
                   <button
                     type='button'
                     className='inline-block mt-2 px-2 py-1 bg-accent text-secondary font-semibold rounded hover:bg-accent/80 transition-colors'
-                    onClick={() => navigate(`/speech/${index}`)}
+                    onClick={() => navigate(`/speech/${index}`, {
+                      state: {
+                        keywords: filterValues.keywords,
+                        caseSensitive: filterValues.caseSensitive
+                      }
+                    })}
                   >
                     Ver más
                   </button>
