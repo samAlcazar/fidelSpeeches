@@ -1,0 +1,13 @@
+{
+  "name": "word-to-json-converter",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Script para convertir documentos Word a JSON",
+  "scripts": {
+    "convert": "node convertWordToJson.js"
+  },
+  "dependencies": {
+    "mammoth": "^1.8.0",
+    "textract": "^2.5.0"
+  }
+}

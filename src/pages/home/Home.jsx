@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { speeches } from '../../data/speeches'
 import FilterSidebar from '../../components/molecules/FilterSidebar'
 import HighlightedText from '../../components/atoms/HighlightedText'
+import SpeechModal from '../../components/molecules/SpeechModal'
 
 const Home = () => {
-  const navigate = useNavigate()
   // Estado para controlar la visibilidad del sidebar en móvil
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  // Estado para el modal del discurso
+  const [selectedSpeech, setSelectedSpeech] = useState(null)
 
   // Estados para los valores de los filtros
   const [filterValues, setFilterValues] = useState({
@@ -15,17 +17,24 @@ const Home = () => {
     caseSensitive: false
   })
 
-  const [filteredSpeeches, setFilteredSpeeches] = useState(speeches)
+  const [filteredSpeeches, setFilteredSpeeches] = useState(() => {
+    // Mostrar 4 discursos aleatorios al inicio
+    const shuffled = [...speeches].sort(() => 0.5 - Math.random())
+    return shuffled.slice(0, 4)
+  })
 
   useEffect(() => {
     let filtered = speeches
+
+    // Verificar si hay filtros activos
+    const hasActiveFilters = filterValues.keywords.trim() !== ''
+
     // Filtrar por palabras clave
-    if (filterValues.keywords.trim()) {
+    if (hasActiveFilters) {
       const searchTerms = filterValues.keywords.split(',').map(term => term.trim()).filter(Boolean)
       filtered = filtered.filter(speech => {
         const fullContent = [
-          speech.title,
-          speech.excerpt,
+          speech.fileName,
           ...(speech.content || [])
         ].join(' ')
         return searchTerms.every(term => {
@@ -34,7 +43,12 @@ const Home = () => {
           return content.includes(searchTerm)
         })
       })
+    } else {
+      // Sin filtros: mostrar 4 discursos aleatorios
+      const shuffled = [...speeches].sort(() => 0.5 - Math.random())
+      filtered = shuffled.slice(0, 6)
     }
+
     setFilteredSpeeches(filtered)
   }, [filterValues])
 
@@ -71,32 +85,17 @@ const Home = () => {
               const searchTerms = filterValues.keywords.split(',').map(term => term.trim()).filter(Boolean)
               return (
                 <article key={index} className='border border-border-dark p-4 bg-card-dark rounded-xl font-light'>
-                  <h3 className='text-lg font-semibold text-primary'>
+                  <h3 className='text-lg font-semibold text-primary mb-2'>
                     <HighlightedText
-                      text={speech.title}
+                      text={speech.content[0] || 'Sin contenido'}
                       searchTerms={searchTerms}
                       caseSensitive={filterValues.caseSensitive}
                     />
                   </h3>
-                  <p><span className='text-primary font-semibold'>Fecha:</span> {speech.date}</p>
-                  <p><span className='text-primary font-semibold'>Localización:</span> {speech.place}</p>
-                  <p><span className='text-primary font-semibold'>Fuente:</span> {speech.font}</p>
-                  <p><span className='text-primary font-semibold'>Resumen:</span>
-                    <HighlightedText
-                      text={speech.excerpt}
-                      searchTerms={searchTerms}
-                      caseSensitive={filterValues.caseSensitive}
-                    />
-                  </p>
                   <button
                     type='button'
                     className='inline-block mt-2 px-2 py-1 bg-accent text-secondary font-semibold rounded hover:bg-accent/80 transition-colors'
-                    onClick={() => navigate(`/speech/${index}`, {
-                      state: {
-                        keywords: filterValues.keywords,
-                        caseSensitive: filterValues.caseSensitive
-                      }
-                    })}
+                    onClick={() => setSelectedSpeech(speech)}
                   >
                     Ver más
                   </button>
@@ -109,6 +108,15 @@ const Home = () => {
           </div>
         </section>
       </div>
+
+      {/* Modal para mostrar discurso completo */}
+      <SpeechModal
+        speech={selectedSpeech}
+        isOpen={selectedSpeech !== null}
+        onClose={() => setSelectedSpeech(null)}
+        searchTerms={filterValues.keywords.split(',').map(term => term.trim()).filter(Boolean)}
+        caseSensitive={filterValues.caseSensitive}
+      />
     </main>
   )
 }
